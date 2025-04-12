@@ -8,8 +8,8 @@ import { FormInput } from "@/components/FormInput";
 import { Button } from "@/components/Button";
 import { createTransaction } from "@/services/transactionService";
 import Image from "next/image";
+import toast from "react-hot-toast";
 
-const currentYear = new Date().getFullYear();
 const currentDate = new Date();
 
 const schema = z
@@ -42,7 +42,7 @@ const schema = z
     const year = parseInt(exp_year);
 
     if (!isNaN(month) && !isNaN(year)) {
-      const expDate = new Date(year, month - 1); // mes - 1 porque Date usa 0-11
+      const expDate = new Date(year, month - 1);
       if (expDate < new Date(currentDate.getFullYear(), currentDate.getMonth())) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -52,7 +52,7 @@ const schema = z
       }
     }
   });
-  
+
 type CheckoutForm = z.infer<typeof schema>;
 
 export default function CheckoutPage() {
@@ -87,14 +87,13 @@ export default function CheckoutPage() {
       });
       router.push(`/confirm?id=${result.id}`);
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message || "Error al procesar el pago");
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 flex items-center justify-center">
       <div className="w-full max-w-xl bg-white rounded-xl shadow overflow-hidden">
-        {/* Imagen ilustrativa */}
         <div className="w-full h-48 relative">
           <Image
             src="/images/illustration-payment.png"
@@ -104,13 +103,11 @@ export default function CheckoutPage() {
           />
         </div>
 
-        {/* Formulario */}
         <div className="p-6 md:p-10">
           <h1 className="text-2xl font-semibold mb-6">Pago con tarjeta</h1>
           <form onSubmit={handleSubmit(onSubmit)}>
             <FormInput label="Nombre completo" {...register("customer_name")} error={errors.customer_name} />
             <FormInput label="Correo electrónico" type="email" {...register("customer_email")} error={errors.customer_email} />
-
             <FormInput
               label={`Monto (${currencySymbol})`}
               type="number"
@@ -118,7 +115,6 @@ export default function CheckoutPage() {
               {...register("amount")}
               error={errors.amount}
             />
-
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Moneda</label>
               <select
@@ -132,9 +128,7 @@ export default function CheckoutPage() {
                 <p className="mt-1 text-sm text-red-600">{errors.currency.message}</p>
               )}
             </div>
-
             <hr className="my-4" />
-
             <FormInput
               label="Número de tarjeta"
               type="tel"
@@ -144,7 +138,6 @@ export default function CheckoutPage() {
               {...register("card_number")}
               error={errors.card_number}
             />
-
             <div className="flex gap-2">
               <FormInput
                 label="Mes"
@@ -167,7 +160,6 @@ export default function CheckoutPage() {
                 error={errors.exp_year}
               />
             </div>
-
             <FormInput
               label="CVC"
               type="tel"
@@ -177,13 +169,12 @@ export default function CheckoutPage() {
               {...register("cvc")}
               error={errors.cvc}
             />
-
             <Button type="submit" disabled={isSubmitting} className="w-full mt-4">
               {isSubmitting ? "Procesando..." : "Pagar ahora"}
             </Button>
           </form>
         </div>
       </div>
-    </div> 
+    </div>
   );
 }

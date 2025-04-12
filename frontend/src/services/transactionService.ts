@@ -1,4 +1,3 @@
-// services/transactionService.ts
 import axios from "axios";
 import type { TransactionCreatePayload, TransactionOut } from "@/types/transaction";
 import { API_URL } from "@/lib/config";

@@ -1,5 +1,3 @@
-// app/page.tsx
-import Link from "next/link";
 import TransactionList from "@/components/TransactionList";
 
 export default function Home() {

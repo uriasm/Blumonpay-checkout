@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import base64
+
 import httpx
 import logging
 from httpx import HTTPStatusError, RequestError
@@ -8,18 +10,30 @@ settings = get_settings()
 logger = logging.getLogger("blumonpay")
 
 
+def build_basic_auth_header(username: str, password: str) -> str:
+    credentials = f"{username}:{password}"
+    encoded_credentials = base64.b64encode(
+        credentials.encode("utf-8")).decode("utf-8")
+    return f"Basic {encoded_credentials}"
+
+
 async def get_blumonpay_token():
     url = settings.blumonpay_token_url
+    auth_header = build_basic_auth_header(
+        settings.blumonpay_user,
+        settings.blumonpay_pass
+    )
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": "Basic Ymx1bW9uX3BheV9lY29tbWVyY2VfYXBpOmJsdW1vbl9wYXlfZWNvbW1lcmNlX2FwaV9wYXNzd29yZA=="
+        "Authorization": auth_header
     }
     data = {
         "grant_type": "password",
         "username": settings.blumonpay_user,
         "password": settings.blumonpay_pass
     }
-    async with httpx.AsyncClient(verify=False) as client:
+
+    async with httpx.AsyncClient() as client:
         response = await client.post(url, headers=headers, data=data)
         response.raise_for_status()
         return response.json()["access_token"]
@@ -33,7 +47,7 @@ async def charge_transaction(token: str, data: dict):
 
     try:
         logger.info("Starting transaction with Blumonpay.")
-        async with httpx.AsyncClient(verify=False) as client:
+        async with httpx.AsyncClient() as client:
             response = await client.post(
                 settings.blumonpay_charge_url,
                 headers=headers,
@@ -45,7 +59,7 @@ async def charge_transaction(token: str, data: dict):
 
             if "transaction_id" not in json_data:
                 logger.warning(
-                    "Response missing transaction_id: %s",json_data)
+                    "Response missing transaction_id: %s", json_data)
                 raise ValueError("Blumonpay response missing transaction_id.")
 
             logger.info("Transaction processed successfully")

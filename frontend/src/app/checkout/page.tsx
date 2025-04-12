@@ -62,6 +62,7 @@ export default function CheckoutPage() {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors, isSubmitting }
   } = useForm<CheckoutForm>({
     resolver: zodResolver(schema),
@@ -131,6 +132,7 @@ export default function CheckoutPage() {
             <hr className="my-4" />
             <FormInput
               label="Número de tarjeta"
+              autoComplete="off"
               type="tel"
               inputMode="numeric"
               pattern="\d{16}"
@@ -141,6 +143,7 @@ export default function CheckoutPage() {
             <div className="flex gap-2">
               <FormInput
                 label="Mes"
+                autoComplete="off"
                 placeholder="MM"
                 type="tel"
                 inputMode="numeric"
@@ -151,6 +154,7 @@ export default function CheckoutPage() {
               />
               <FormInput
                 label="Año"
+                autoComplete="off"
                 placeholder="YYYY"
                 type="tel"
                 inputMode="numeric"
@@ -162,6 +166,7 @@ export default function CheckoutPage() {
             </div>
             <FormInput
               label="CVC"
+              autoComplete="off"
               type="tel"
               inputMode="numeric"
               pattern="\d{3}"
